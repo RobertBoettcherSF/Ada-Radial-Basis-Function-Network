@@ -28,8 +28,9 @@ procedure Tests is
    --  Reusable variables for testing
    V1, V2, V3 : Feature_Vector (1 .. 2);
    Dist       : Distance;
+   pragma Warnings (Off, "variable ""Dist"" is assigned but never read");
    Act        : Real;
-   Net_Valid  : RBF_Network := Create_Network
+   Net_Valid  : constant RBF_Network := Create_Network
      (Centers => [[1 => 0.0, 2 => 0.0], [1 => 2.0, 2 => 2.0]],
       Weights => [1 => 1.0, 2 => -1.0],
       Bias    => 0.0,
@@ -131,7 +132,8 @@ begin
    begin
       begin
          declare
-             Net_Err : RBF_Network := Create_Network (Centers_A, Weights_A, 0.0, 1.0, Gaussian, False);
+             Net_Err : constant RBF_Network := Create_Network (Centers_A, Weights_A, 0.0, 1.0, Gaussian, False);
+             pragma Unreferenced (Net_Err);
          begin
              Check ("8.1 Center>Weight mismatch (expected failure)", False);
          end;
@@ -142,7 +144,8 @@ begin
       
       begin
          declare
-             Net_Err : RBF_Network := Create_Network (Centers_B, Weights_B, 0.0, 1.0, Gaussian, False);
+             Net_Err : constant RBF_Network := Create_Network (Centers_B, Weights_B, 0.0, 1.0, Gaussian, False);
+             pragma Unreferenced (Net_Err);
          begin
              Check ("8.2 Center<Weight mismatch (expected failure)", False);
          end;
@@ -153,7 +156,8 @@ begin
 
       begin
          declare
-             Net_Err : RBF_Network := Create_Network (Centers_A, Weights_C, 0.0, 1.0, Gaussian, False);
+             Net_Err : constant RBF_Network := Create_Network (Centers_A, Weights_C, 0.0, 1.0, Gaussian, False);
+             pragma Unreferenced (Net_Err);
          begin
              Check ("8.3 Center vs Large Weight mismatch (expected failure)", False);
          end;
@@ -192,7 +196,7 @@ begin
    Put_Line ("TEST 10 -- Normalization Error on Extreme Distances");
    declare
       --  Gaussian drops extremely fast. Shape 1000 and Dist > 1000 causes sum to underflow to 0.0
-      Net_Norm : RBF_Network := Create_Network
+      Net_Norm : constant RBF_Network := Create_Network
         (Centers => [[1 => 0.0, 2 => 0.0], [1 => 1.0, 2 => 1.0]],
          Weights => [1 => 1.0, 2 => 1.0],
          Bias    => 0.0,
@@ -228,7 +232,7 @@ begin
    --  TEST 11: Evaluate Standard Gaussian
    Put_Line ("TEST 11 -- Evaluate Standard Gaussian Network");
    declare
-      Net_SG : RBF_Network := Create_Network
+      Net_SG : constant RBF_Network := Create_Network
         (Centers => [[1 => 0.0, 2 => 0.0]],
          Weights => [1 => 2.0],
          Bias    => 0.5,
@@ -247,7 +251,7 @@ begin
    --  TEST 12: Evaluate Normalized Multiquadric
    Put_Line ("TEST 12 -- Evaluate Normalized Multiquadric Network");
    declare
-      Net_NM : RBF_Network := Create_Network
+      Net_NM : constant RBF_Network := Create_Network
         (Centers => [[1 => 0.0, 2 => 0.0], [1 => 2.0, 2 => 0.0]],
          Weights => [1 => 1.0, 2 => -1.0],
          Bias    => 0.5,
@@ -268,7 +272,7 @@ begin
       --  Dist to C2 = 2 -> Act2 = Sqrt(5)
       --  Total = (1.0 - Sqrt(5)) / (1.0 + Sqrt(5)) + 0.5
       declare
-         Expected : Real := ((1.0 - Sqrt (5.0)) / (1.0 + Sqrt (5.0))) + 0.5;
+         Expected : constant Real := ((1.0 - Sqrt (5.0)) / (1.0 + Sqrt (5.0))) + 0.5;
       begin
          Act := Evaluate (Net_NM, [0.0, 0.0]);
          Check ("12.2 Output heavily weighted by nearest center", Is_Close (Act, Expected));
@@ -279,7 +283,7 @@ begin
       --  Dist to C2 = 0 -> Act2 = 1.0
       --  Total = (Sqrt(5) - 1.0) / (1.0 + Sqrt(5)) + 0.5
       declare
-         Expected : Real := ((Sqrt (5.0) - 1.0) / (1.0 + Sqrt (5.0))) + 0.5;
+         Expected : constant Real := ((Sqrt (5.0) - 1.0) / (1.0 + Sqrt (5.0))) + 0.5;
       begin
          Act := Evaluate (Net_NM, [2.0, 0.0]);
          Check ("12.3 Opposite weighting on inverse side", Is_Close (Act, Expected));
@@ -289,7 +293,7 @@ begin
    --  TEST 13: Edge Case (Single Feature, Single Center)
    Put_Line ("TEST 13 -- Edge Case (1 Center, 1 Feature)");
    declare
-      Net_Edge_Std : RBF_Network := Create_Network
+      Net_Edge_Std : constant RBF_Network := Create_Network
         (Centers => [[1 => 10.0]],
          Weights => [1 => -3.0],
          Bias    => 1.0,
@@ -297,7 +301,7 @@ begin
          Function_Type => Inverse_Quadratic,
          Is_Normalized => False);
          
-      Net_Edge_Norm : RBF_Network := Create_Network
+      Net_Edge_Norm : constant RBF_Network := Create_Network
         (Centers => [[1 => 10.0]],
          Weights => [1 => -3.0],
          Bias    => 1.0,
