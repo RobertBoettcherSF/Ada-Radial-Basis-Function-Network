@@ -30,8 +30,8 @@ procedure Tests is
    Dist       : Distance;
    Act        : Real;
    Net_Valid  : RBF_Network := Create_Network
-     (Centers => ((1 => 0.0, 2 => 0.0), (1 => 2.0, 2 => 2.0)),
-      Weights => (1 => 1.0, 2 => -1.0),
+     (Centers => [[1 => 0.0, 2 => 0.0], [1 => 2.0, 2 => 2.0]],
+      Weights => [1 => 1.0, 2 => -1.0],
       Bias    => 0.0,
       Shape   => 1.0,
       Function_Type => Gaussian,
@@ -40,9 +40,9 @@ procedure Tests is
 begin
    --  TEST 1: Euclidean Distance Functionality
    Put_Line ("TEST 1 -- Euclidean Distance Valid");
-   V1 := (0.0, 0.0);
-   V2 := (3.0, 4.0);
-   V3 := (-1.0, 1.0);
+   V1 := [0.0, 0.0];
+   V2 := [3.0, 4.0];
+   V3 := [-1.0, 1.0];
    Check ("1.1 Zeros to zeros gives 0.0", Is_Close (Real (Euclidean_Distance (V1, V1)), 0.0));
    Check ("1.2 3-4-5 Triangle gives 5.0", Is_Close (Real (Euclidean_Distance (V1, V2)), 5.0));
    Check ("1.3 Distance between V2 and V3", Is_Close (Real (Euclidean_Distance (V2, V3)), 5.0));
@@ -50,8 +50,8 @@ begin
    --  TEST 2: Euclidean Distance Dimension Errors
    Put_Line ("TEST 2 -- Euclidean Distance Error Handling");
    declare
-      V_Short : Feature_Vector (1 .. 1) := (1 => 0.0);
-      V_Long  : Feature_Vector (1 .. 3) := (1 => 0.0, 2 => 0.0, 3 => 0.0);
+      V_Short : constant Feature_Vector (1 .. 1) := [1 => 0.0];
+      V_Long  : constant Feature_Vector (1 .. 3) := [1 => 0.0, 2 => 0.0, 3 => 0.0];
    begin
       begin
          Dist := Euclidean_Distance (V1, V_Short);
@@ -118,16 +118,16 @@ begin
    Put_Line ("TEST 7 -- Create_Network Invariants");
    Check ("7.1 Extracted correct Num_Centers", Net_Valid.Num_Centers = 2);
    Check ("7.2 Extracted correct Num_Features", Net_Valid.Num_Features = 2);
-   Check ("7.3 Values mapped correctly to 1-based index", Net_Valid.Weights (1) = 1.0);
+   Check ("7.3 Network evaluates successfully at origin", Is_Close (Evaluate (Net_Valid, V1), 1.0 - Exp (-8.0)));
 
    --  TEST 8: Network Creation Errors
    Put_Line ("TEST 8 -- Create_Network Preconditions / Error Handling");
    declare
-      Centers_A : Center_Matrix (1 .. 2, 1 .. 2) := (others => (others => 0.0));
-      Centers_B : Center_Matrix (1 .. 1, 1 .. 2) := (others => (others => 0.0));
-      Weights_A : Weight_Vector (1 .. 1) := (others => 0.0);
-      Weights_B : Weight_Vector (1 .. 2) := (others => 0.0);
-      Weights_C : Weight_Vector (1 .. 3) := (others => 0.0);
+      Centers_A : constant Center_Matrix (1 .. 2, 1 .. 2) := [others => [others => 0.0]];
+      Centers_B : constant Center_Matrix (1 .. 1, 1 .. 2) := [others => [others => 0.0]];
+      Weights_A : constant Weight_Vector (1 .. 1) := [others => 0.0];
+      Weights_B : constant Weight_Vector (1 .. 2) := [others => 0.0];
+      Weights_C : constant Weight_Vector (1 .. 3) := [others => 0.0];
    begin
       begin
          declare
@@ -166,8 +166,8 @@ begin
    --  TEST 9: Evaluate Dimension Mismatch Error
    Put_Line ("TEST 9 -- Evaluate Input Mismatch Handling");
    declare
-      V_Short : Feature_Vector (1 .. 1) := (1 => 0.0);
-      V_Long  : Feature_Vector (1 .. 3) := (others => 0.0);
+      V_Short : constant Feature_Vector (1 .. 1) := [1 => 0.0];
+      V_Long  : constant Feature_Vector (1 .. 3) := [others => 0.0];
    begin
       begin
          Act := Evaluate (Net_Valid, V_Short);
@@ -184,7 +184,7 @@ begin
       end;
 
       --  A valid evaluation should not raise exception
-      Act := Evaluate (Net_Valid, (0.0, 0.0));
+      Act := Evaluate (Net_Valid, [0.0, 0.0]);
       Check ("9.3 Valid input evaluates cleanly", True);
    end;
 
@@ -193,15 +193,15 @@ begin
    declare
       --  Gaussian drops extremely fast. Shape 1000 and Dist > 1000 causes sum to underflow to 0.0
       Net_Norm : RBF_Network := Create_Network
-        (Centers => ((1 => 0.0, 2 => 0.0), (1 => 1.0, 2 => 1.0)),
-         Weights => (1 => 1.0, 2 => 1.0),
+        (Centers => [[1 => 0.0, 2 => 0.0], [1 => 1.0, 2 => 1.0]],
+         Weights => [1 => 1.0, 2 => 1.0],
          Bias    => 0.0,
          Shape   => 1000.0,
          Function_Type => Gaussian,
          Is_Normalized => True);
-      Far1 : Feature_Vector (1 .. 2) := (1000.0, 1000.0);
-      Far2 : Feature_Vector (1 .. 2) := (5000.0, -5000.0);
-      Far3 : Feature_Vector (1 .. 2) := (-9999.0, -9999.0);
+      Far1 : constant Feature_Vector (1 .. 2) := [1000.0, 1000.0];
+      Far2 : constant Feature_Vector (1 .. 2) := [5000.0, -5000.0];
+      Far3 : constant Feature_Vector (1 .. 2) := [-9999.0, -9999.0];
    begin
       begin
          Act := Evaluate (Net_Norm, Far1);
@@ -229,18 +229,18 @@ begin
    Put_Line ("TEST 11 -- Evaluate Standard Gaussian Network");
    declare
       Net_SG : RBF_Network := Create_Network
-        (Centers => ((1 => 0.0, 2 => 0.0),),
-         Weights => (1 => 2.0,),
+        (Centers => [[1 => 0.0, 2 => 0.0]],
+         Weights => [1 => 2.0],
          Bias    => 0.5,
          Shape   => 1.0,
          Function_Type => Gaussian,
          Is_Normalized => False);
    begin
-      Act := Evaluate (Net_SG, (0.0, 0.0));
+      Act := Evaluate (Net_SG, [0.0, 0.0]);
       Check ("11.1 At center -> 2.0 * Exp(0) + 0.5 = 2.5", Is_Close (Act, 2.5));
-      Act := Evaluate (Net_SG, (1.0, 0.0));
+      Act := Evaluate (Net_SG, [1.0, 0.0]);
       Check ("11.2 Dist 1.0 -> 2.0 * Exp(-1) + 0.5", Is_Close (Act, 2.0 * Exp (-1.0) + 0.5));
-      Act := Evaluate (Net_SG, (0.0, 2.0));
+      Act := Evaluate (Net_SG, [0.0, 2.0]);
       Check ("11.3 Dist 2.0 -> 2.0 * Exp(-4) + 0.5", Is_Close (Act, 2.0 * Exp (-4.0) + 0.5));
    end;
 
@@ -248,8 +248,8 @@ begin
    Put_Line ("TEST 12 -- Evaluate Normalized Multiquadric Network");
    declare
       Net_NM : RBF_Network := Create_Network
-        (Centers => ((1 => 0.0, 2 => 0.0), (1 => 2.0, 2 => 0.0)),
-         Weights => (1 => 1.0, 2 => -1.0),
+        (Centers => [[1 => 0.0, 2 => 0.0], [1 => 2.0, 2 => 0.0]],
+         Weights => [1 => 1.0, 2 => -1.0],
          Bias    => 0.5,
          Shape   => 1.0,
          Function_Type => Multiquadric,
@@ -260,7 +260,7 @@ begin
       --  Act1 = Sqrt(1+1) = Sqrt(2). Act2 = Sqrt(2).
       --  Total_Sum = 1.0*Sqrt(2) - 1.0*Sqrt(2) = 0.0.
       --  Output = 0.0 / (2*Sqrt(2)) + 0.5 = 0.5
-      Act := Evaluate (Net_NM, (1.0, 0.0));
+      Act := Evaluate (Net_NM, [1.0, 0.0]);
       Check ("12.1 Equidistant inputs cancel out to bias", Is_Close (Act, 0.5));
 
       --  Input at (0.0, 0.0)
@@ -270,7 +270,7 @@ begin
       declare
          Expected : Real := ((1.0 - Sqrt (5.0)) / (1.0 + Sqrt (5.0))) + 0.5;
       begin
-         Act := Evaluate (Net_NM, (0.0, 0.0));
+         Act := Evaluate (Net_NM, [0.0, 0.0]);
          Check ("12.2 Output heavily weighted by nearest center", Is_Close (Act, Expected));
       end;
       
@@ -281,7 +281,7 @@ begin
       declare
          Expected : Real := ((Sqrt (5.0) - 1.0) / (1.0 + Sqrt (5.0))) + 0.5;
       begin
-         Act := Evaluate (Net_NM, (2.0, 0.0));
+         Act := Evaluate (Net_NM, [2.0, 0.0]);
          Check ("12.3 Opposite weighting on inverse side", Is_Close (Act, Expected));
       end;
    end;
@@ -290,22 +290,22 @@ begin
    Put_Line ("TEST 13 -- Edge Case (1 Center, 1 Feature)");
    declare
       Net_Edge_Std : RBF_Network := Create_Network
-        (Centers => ((1 => 10.0,),),
-         Weights => (1 => -3.0,),
+        (Centers => [[1 => 10.0]],
+         Weights => [1 => -3.0],
          Bias    => 1.0,
          Shape   => 2.0,
          Function_Type => Inverse_Quadratic,
          Is_Normalized => False);
          
       Net_Edge_Norm : RBF_Network := Create_Network
-        (Centers => ((1 => 10.0,),),
-         Weights => (1 => -3.0,),
+        (Centers => [[1 => 10.0]],
+         Weights => [1 => -3.0],
          Bias    => 1.0,
          Shape   => 2.0,
          Function_Type => Inverse_Quadratic,
          Is_Normalized => True);
          
-      Inp : Feature_Vector (1 .. 1) := (1 => 11.0);
+      Inp : constant Feature_Vector (1 .. 1) := [1 => 11.0];
    begin
       --  Dist = 1.0. Shape = 2.0. Epsilon = 2.0.
       --  Act = 1 / (1 + 4) = 0.2.
@@ -320,7 +320,7 @@ begin
       Check ("13.2 Evaluates 1x1 normalized (always weight + bias)", Is_Close (Act, -2.0));
       
       --  Check at center (dist = 0.0) -> Standard should be -3.0 * 1.0 + 1.0 = -2.0
-      Act := Evaluate (Net_Edge_Std, (1 => 10.0));
+      Act := Evaluate (Net_Edge_Std, [1 => 10.0]);
       Check ("13.3 Standard exactly on center", Is_Close (Act, -2.0));
    end;
 
