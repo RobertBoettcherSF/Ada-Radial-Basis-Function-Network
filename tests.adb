@@ -27,8 +27,6 @@ procedure Tests is
 
    --  Reusable variables for testing
    V1, V2, V3 : Feature_Vector (1 .. 2);
-   Dist       : Distance;
-   pragma Warnings (Off, "variable ""Dist"" is assigned but never read");
    Act        : Real;
    Net_Valid  : constant RBF_Network := Create_Network
      (Centers => [[1 => 0.0, 2 => 0.0], [1 => 2.0, 2 => 2.0]],
@@ -55,24 +53,36 @@ begin
       V_Long  : constant Feature_Vector (1 .. 3) := [1 => 0.0, 2 => 0.0, 3 => 0.0];
    begin
       begin
-         Dist := Euclidean_Distance (V1, V_Short);
-         Check ("2.1 Length 2 vs Length 1 (expected failure)", False);
+         declare
+            Dummy_Dist : constant Distance := Euclidean_Distance (V1, V_Short);
+            pragma Unreferenced (Dummy_Dist);
+         begin
+            Check ("2.1 Length 2 vs Length 1 (expected failure)", False);
+         end;
       exception
          when Dimension_Mismatch_Error => Check ("2.1 Caught Length 2 vs 1 correctly", True);
          when others => Check ("2.1 Wrong exception caught", False);
       end;
       
       begin
-         Dist := Euclidean_Distance (V_Short, V1);
-         Check ("2.2 Length 1 vs Length 2 (expected failure)", False);
+         declare
+            Dummy_Dist : constant Distance := Euclidean_Distance (V_Short, V1);
+            pragma Unreferenced (Dummy_Dist);
+         begin
+            Check ("2.2 Length 1 vs Length 2 (expected failure)", False);
+         end;
       exception
          when Dimension_Mismatch_Error => Check ("2.2 Caught Length 1 vs 2 correctly", True);
          when others => Check ("2.2 Wrong exception caught", False);
       end;
       
       begin
-         Dist := Euclidean_Distance (V_Long, V1);
-         Check ("2.3 Length 3 vs Length 2 (expected failure)", False);
+         declare
+            Dummy_Dist : constant Distance := Euclidean_Distance (V_Long, V1);
+            pragma Unreferenced (Dummy_Dist);
+         begin
+            Check ("2.3 Length 3 vs Length 2 (expected failure)", False);
+         end;
       exception
          when Dimension_Mismatch_Error => Check ("2.3 Caught Length 3 vs 2 correctly", True);
          when others => Check ("2.3 Wrong exception caught", False);
